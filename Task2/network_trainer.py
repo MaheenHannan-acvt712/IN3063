@@ -4,6 +4,11 @@ class NetworkTrainer:
     def __init__(self, neural_network):
         self.neural_network = neural_network
 
+    def sgd(self, data, truth_labels, learining_rate):
+        model_labels = self.neural_network.forward(data)
+        self.neural_network.backward(data, truth_labels,
+                                     model_labels, learining_rate)
+
     def train_network(self,
                       
                       data_train, labels_train,
@@ -25,6 +30,7 @@ class NetworkTrainer:
                 mini_batch = batches[batch:eob]
                 data_batch = data_train[mini_batch]
                 labels_batch = labels_train[mini_batch]
+                self.sgd(data_batch, labels_batch, learning_rate)
 
                 model_labels = self.neural_network.forward(data_batch)
                 
