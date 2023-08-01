@@ -10,7 +10,8 @@ def get_relu(func, activation=False, gradient=False):
         return gradient
     else:
         return None
-    
+
+
 def get_sigmoid(func, activation=False, gradient=False):
     sigmoid = 1 / (1 + np.exp(-func))
     if activation and not gradient:
@@ -20,60 +21,49 @@ def get_sigmoid(func, activation=False, gradient=False):
         return gradient
     else:
         return None
-    
-def get_softmax(func=None, model_labels=None, truth_labels=None,
-                activation=False, gradient=False):
-    
-    if activation and not gradient:
-        exp_func = np.exp(func - np.max(func, axis=1, keepdims=True))
-        exp_func = exp_func / np.sum(exp_func, axis=1, keepdims=True)
-        return exp_func
-    elif not activation and gradient:
-        batch_size = model_labels.shape[0]
-        gradient = (model_labels - truth_labels) / batch_size
-        return gradient
-    else:
-        return None
+
+
+def get_softmax(func=None, model_labels=None, truth_labels=None, activation=False, gradient=False):
+    batch_size = model_labels.shape[0]
+    gradient = (model_labels - truth_labels) / batch_size
+    return gradient
 
 
 class NeuralNetwork:
-    def __init__(self, hidden_layers, activation='relu'):
-        
+    def __init__(self, hidden_layers, activation):
         input_layers, output_layers = DatasetGenerator().get_layers()
         hidden_layers.insert(0, input_layers)
         hidden_layers.append(output_layers)
-        
+
         self.layers = hidden_layers
         self.num_layers = len(self.layers)
-        self.biases = [np.zeros((1, self.layers[i+1])) for i in range(self.num_layers - 1)]
+        self.biases = [np.zeros((1, self.layers[i + 1])) for i in range(self.num_layers - 1)]
         self.activation = activation
         self.activations = []
         self.vect_transfer_list = []
-        
+
         self.weights = []
         for layer in range(self.num_layers - 1):
-            random_matrix = np.random.randn(self.layers[layer],
-                                            self.layers[layer+1])
+            random_matrix = np.random.randn(self.layers[layer], self.layers[layer + 1])
             scale = np.sqrt(2 / self.layers[layer])
             self.weights.append(random_matrix * scale)
 
     def forward(self, data):
         self.activations = []
         self.vect_transfer_list = []
-        
+
         outputs = data
         self.activations.append(outputs)
-        
+
         for layer in range(self.num_layers - 1):
             i = np.dot(outputs, self.weights[layer])
             vect_transfer = i + self.biases[layer]
             self.vect_transfer_list.append(vect_transfer)
 
             if self.activation == 'sigmoid':
-                outputs = get_sigmoid(vect_transfer,activation=True)
-                
+                outputs = get_sigmoid(vect_transfer, activation=True)
             elif self.activation == 'relu':
-                outputs = get_relu(vect_transfer,activation=True)
+                outputs = get_relu(vect_transfer, activation=True)
 
             self.activations.append(outputs)
 
@@ -86,30 +76,27 @@ class NeuralNetwork:
 
         if self.activation == 'sigmoid':
             activation_gradient = get_sigmoid
-            
         elif self.activation == 'relu':
             activation_gradient = get_relu
 
         # Backpropagation
-        delta = get_softmax(model_labels=model_labels,
-                                                  truth_labels=truth_labels,
-                                                  gradient=True)
+        delta = get_softmax(model_labels=model_labels, truth_labels=truth_labels, gradient=True)
 
         for layer in range(self.num_layers - 1, 0, -1):
             output = self.activations[layer - 1]
             vect_transfer = self.vect_transfer_list[layer - 1]
-            
+
             gradients_vect_transform = activation_gradient(vect_transfer, gradient=True)
             gradients_vect_transform = gradients_vect_transform * delta
-            
+
             gradients_weight = np.dot(output.T, gradients_vect_transform)
             gradients_weight = gradients_weight / batch_size
-            
+
             gradients_bias = np.sum(gradients_vect_transform, axis=0, keepdims=True)
             gradients_bias = gradients_bias / batch_size
-            
+
             delta = np.dot(gradients_vect_transform, self.weights[layer - 1].T)
-            
+
             gradients_weights.append(gradients_weight)
             gradients_biases.append(gradients_bias)
 
