@@ -25,9 +25,9 @@ class NetworkTrainer:
                 mini_batch = batches[batch:eob]
                 data_batch = data_train[mini_batch]
                 labels_batch = labels_train[mini_batch]
-                self.sgd(data_batch, labels_batch, learning_rate)
 
                 model_labels = self.neural_network.forward(data_batch)
+                self.sgd(data_batch, labels_batch, learning_rate)
                 self.neural_network.backward(data_batch, labels_batch, model_labels, learning_rate)
 
                 loss = self.neural_network.calculate_loss(data_train, labels_train)
