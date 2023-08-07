@@ -3,7 +3,7 @@ Directory contains:
 1) Baseline Algorithm written in Python and Jupyter Notebook
   Baseline algorithm to complete the grid with adjacent Notebook
 
-2) Dijkstras Algorithm written in Python and Jupyter Notebook
+3) Dijkstras Algorithm written in Python and Jupyter Notebook
   Implementation of Dijksyta's algorithm to complete the grid with adjacent Notebook
 
 1) Util written in Python and Jupyter Notebook
