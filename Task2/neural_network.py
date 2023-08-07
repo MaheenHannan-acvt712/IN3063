@@ -32,10 +32,11 @@ def get_softmax(func=None, model_labels=None, truth_labels=None, activation=Fals
 class NeuralNetwork:
     def __init__(self, hidden_layers, activation):
         input_layers, output_layers = DatasetGenerator().get_layers()
-        hidden_layers.insert(0, input_layers)
-        hidden_layers.append(output_layers)
-
-        self.layers = hidden_layers
+        self.layers = [input_layers, hidden_layers[0],
+                       hidden_layers[1], output_layers]
+        
+        self.hidden_layers = hidden_layers
+        
         self.num_layers = len(self.layers)
         self.biases = [np.zeros((1, self.layers[i + 1])) for i in range(self.num_layers - 1)]
         self.activation = activation
@@ -47,6 +48,12 @@ class NeuralNetwork:
             random_matrix = np.random.randn(self.layers[layer], self.layers[layer + 1])
             scale = np.sqrt(2 / self.layers[layer])
             self.weights.append(random_matrix * scale)
+    
+    def get_activation(self):
+        return self.activation
+    
+    def get_hidden_layers(self):
+        return self.hidden_layers
 
     def forward(self, data):
         self.activations = []

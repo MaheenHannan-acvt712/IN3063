@@ -1,8 +1,22 @@
 import numpy as np
+import pandas as pd
 
 class NetworkTrainer:
     def __init__(self, neural_network):
         self.neural_network = neural_network
+        self.results = pd.DataFrame(columns=("activation",
+                                             "hl arch",
+                                             "epoch",
+                                             "step",
+                                             "loss",
+                                             "accuracy"))
+        
+        self.activation = None
+        self.hl_arch = None
+        self.epoch = None
+        self.step = None
+        self.loss = None
+        self.accuracy = None
 
     def sgd(self, data, truth_labels, learning_rate):
         model_labels = self.neural_network.forward(data)
@@ -34,10 +48,36 @@ class NetworkTrainer:
 
                 model_label = self.neural_network.predict(data_test)
                 accuracy = np.mean(model_label == np.argmax(labels_test, axis=1))
+                
+                self.activations = self.neural_network.get_activation()
+                self.hl_arch = self.neural_network.get_hidden_layers()
+                self.epoch = int(epoch + 1/epochs)
+                self.step = int(batch / batch_size)
+                self.loss = round(loss, 4)
+                self.accuracy = round(accuracy, 4)
+                
+                self.print_save()
+                                    
+                
+    def print_save(self):
+        
+        activation_print = f"Activation: {self.activations}"
+        epoch_print = f"Epoch: {self.epoch}"
+        step_print = f"Step: {self.step}"
+        loss_print = f"Loss: {self.loss}"
+        accuracy_print = f"Accuracy: {self.accuracy}"
+        
+        results = {'activation' : self.activations,
+                   'hl arch' : self.hl_arch,
+                   'epoch' : self.epoch,
+                   'step' : self.step,
+                   'loss' : self.loss,
+                   'accuracy' : self.accuracy}
+        
+        self.results = self.results.append(results, ignore_index=True)
 
-                epoch_print = f"Epoch {epoch + 1}/{epochs}"
-                step_print = f"Step: {int(batch / batch_size)}"
-                loss_print = f"Loss: {loss:.4f}"
-                test_print = f"Accuracy: {accuracy:.4f}"
-
-                print(epoch_print, step_print, loss_print, test_print)
+        print(activation_print, epoch_print, step_print, loss_print, accuracy_print)
+        
+    def get_results(self):
+        return self.results
+        
